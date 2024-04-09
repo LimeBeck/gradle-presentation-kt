@@ -1,3 +1,5 @@
+#!/usr/bin/env -S revealkt run
+
 import dev.limebeck.revealkt.core.RevealKt
 
 title = "(Де)мистифицируем Gradle"
@@ -6,30 +8,7 @@ configuration {
     controls = false
     progress = true
     theme = RevealKt.Configuration.Theme.Predefined.BLACK
-    additionalCssStyle = """
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
-
-		.reveal h1,
-		.reveal h2,
-		.reveal h3,
-		.reveal h4,
-		.reveal h5,
-		.reveal h6 {
-			font-family: 'Roboto', sans-serif;
-		}
-
-		.reveal .slide {
-			font-family: 'Roboto', sans-serif;
-		}
-
-		.container {
-			display: flex;
-		}
-
-		.col {
-			flex: 1;
-		}
-    """.trimIndent()
+    additionalCssStyle = loadAsset("styles.css").decodeToString()
 }
 
 slides {
@@ -94,105 +73,15 @@ slides {
         }
     }
 
-    //language=XML
-    val mavenStyleCode = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-      
-          <modelVersion>4.0.0</modelVersion>
-      
-          <groupId>org.example</groupId>
-          <artifactId>maven-module</artifactId>
-          <version>1.0-SNAPSHOT</version>
-          <packaging>jar</packaging>
-      
-          <name>org.example maven-module</name>
-      
-          <properties>
-              <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-              <kotlin.version>1.6.10</kotlin.version>
-              <kotlin.code.style>official</kotlin.code.style>
-              <junit.version>4.12</junit.version>
-          </properties>
-      
-          <dependencies>
-              <dependency>
-                  <groupId>org.jetbrains.kotlin</groupId>
-                  <artifactId>kotlin-stdlib</artifactId>
-                  <version>\${'$'}{kotlin.version}</version>
-              </dependency>
-              <dependency>
-                  <groupId>org.jetbrains.kotlin</groupId>
-                  <artifactId>kotlin-test-junit</artifactId>
-                  <version>\${'$'}{kotlin.version}</version>
-                  <scope>test</scope>
-              </dependency>
-              <dependency>
-                  <groupId>junit</groupId>
-                  <artifactId>junit</artifactId>
-                  <version>\${'$'}{junit.version}</version>
-                  <scope>test</scope>
-              </dependency>
-          </dependencies>
-      
-          <build>
-              <sourceDirectory>src/main/kotlin</sourceDirectory>
-              <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-      
-              <plugins>
-                  <plugin>
-                      <groupId>org.jetbrains.kotlin</groupId>
-                      <artifactId>kotlin-maven-plugin</artifactId>
-                      <version>\${'$'}{kotlin.version}</version>
-                      <executions>
-                          <execution>
-                              <id>compile</id>
-                              <phase>compile</phase>
-                              <goals>
-                                  <goal>compile</goal>
-                              </goals>
-                          </execution>
-                          <execution>
-                              <id>test-compile</id>
-                              <phase>test-compile</phase>
-                              <goals>
-                                  <goal>test-compile</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                  </plugin>
-              </plugins>
-          </build>
-      </project>
-    """.trimIndent()
-
     regularSlide {
         +title(fitText = true) { "Maven-style" }
         +note("И такое еще на 70 строк + нельзя указать в одном месте версии зависимостей для всех подпроектов")
-        +code(lines = "1-30|30-50|50-70") { mavenStyleCode }
+        +code(lines = "1-30|30-50|50-70") { loadAsset("pom.xml").decodeToString() }
     }
-
-    //language=kotlin
-    val gradleStyleCode = """
-        plugins {
-            kotlin("jvm") version "1.6.10"
-        }
-        
-        group = "org.example"
-        version = "1.0-SNAPSHOT"
-        
-        repostories {
-            mavenCentral()
-        }
-        
-        dependencies {
-            implementation(kotlin("stdlib"))
-        }
-    """.trimIndent()
 
     regularSlide {
         +title(fitText = true) { "Gradle-style" }
-        +code(lang = "kotlin") { gradleStyleCode }
+        +code(lang = "kotlin") { loadAsset("build.gradle.kts").decodeToString() }
     }
 
     regularSlide {
@@ -334,9 +223,8 @@ slides {
                 }
                 
                 subprojects {
-                    tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar>().configureEach {
-                        finalizedBy(copyJarsToDist)
-                    }
+                    tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar>()
+                        .configureEach { finalizedBy(copyJarsToDist) }
                 }
             """.trimIndent()
         }
